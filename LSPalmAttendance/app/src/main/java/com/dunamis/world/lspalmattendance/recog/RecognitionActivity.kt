@@ -118,8 +118,7 @@ open class RecognitionActivity : AppCompatActivity(), RecognitionView {
     companion object {
         private const val TAG_ENGINE = "PalmEngine"
         private val REQUEST_PERMISSION = arrayOf(
-            PermissionLists.getCameraPermission(),
-            PermissionLists.getManageExternalStoragePermission()
+            PermissionLists.getCameraPermission()
         )
     }
 
