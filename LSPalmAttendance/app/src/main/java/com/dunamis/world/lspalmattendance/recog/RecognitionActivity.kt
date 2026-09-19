@@ -39,6 +39,7 @@ import com.api.stream.bean.CaptureFrame
 import com.api.stream.bean.ExtraFrameInfo
 import com.api.stream.bean.ImageInstance
 import com.api.stream.enumclass.Hint
+import com.api.stream.enumclass.RecognizeMode
 import com.api.stream.manager.DtUsbDevice
 import com.api.stream.manager.DtUsbManager.DeviceStateListener
 import com.api.stream.manager.UsbMapTable
@@ -129,6 +130,8 @@ open class RecognitionActivity : AppCompatActivity(), RecognitionView {
     private var mPalmCache: MutableList<Palm> = ArrayList()
 
     enum class WorkMode { NONE, REGISTER, RECOGNIZE }
+
+    private val mode = RecognizeMode.kBiModal
 
     @Volatile
     private var mCurrentWorkMode = WorkMode.NONE
@@ -392,7 +395,7 @@ open class RecognitionActivity : AppCompatActivity(), RecognitionView {
         matchPool.execute {
             if (mDevice != null) {
                 algoStatus = EnableAlgorithmStatus.INITIALIZING
-                if ((mDevice as IVeinshine).enableDimPalm(modelPath) == 0) {
+                if ((mDevice as IVeinshine).enableDimPalm(modelPath, mode) == 0) {
                     algoStatus = EnableAlgorithmStatus.ENABLE
 //                    showToast("Algorithm Ready")
 
@@ -482,8 +485,7 @@ open class RecognitionActivity : AppCompatActivity(), RecognitionView {
                 val res = device.compareFeatureScore(candidateRgb,
                     candidateIr,
                     live.rgbFeature,
-                    live.irFeature)
-
+                    live.irFeature, mode)
                 if (res.irScore > 0.75 && res.irScore > maxScore) {
                     maxScore = res.irScore
                     bestMatchCandidate = candidate
@@ -674,6 +676,10 @@ open class RecognitionActivity : AppCompatActivity(), RecognitionView {
                 mCurrentWorkMode = WorkMode.NONE
                 restartRecognitionWithDelay(PALM_DELAY_MILLIS)
             }
+        }
+
+        override fun onCapturePalmQualityPass() {
+
         }
     }
 
