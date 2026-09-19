@@ -162,106 +162,106 @@ class HomePresenter(c: HomeActivity) {
                     paramsObj.put("last_updated_time",
                         sharedPref.getPalmDBDownloadedTimeGMT() ?: "")
                     val url: String = sharedPref.getBaseUrl() + URLS().GET_PALM_BATCH
-//                    AppController.getInstance().getRequestQueue().getCache().invalidate(url, true)
-                    val jsonObjReq: StringRequest = object : StringRequest(Request.Method.POST,
+                    val jsonObjReq: StringRequest = object : StringRequest(Method.POST,
                         url,
                         Response.Listener { response: String? ->
                             try {
-                                val jsonObjectRes = JSONObject(response.toString())
-                                if (jsonObjectRes.has("status")) {
-                                    if (jsonObjectRes.getString("status").trim()
-                                            .equals("success", ignoreCase = true)) {
+                                val jsonObjectRes = JSONObject(response ?: "")
+                                if (jsonObjectRes.optString("status")
+                                        .equals("success", ignoreCase = true)) {
 
-                                        if (palmPageNo == "1") {
-                                            if (sharedPref.getPalmDBDownloadedTimeGMT()
-                                                    .isNullOrEmpty()) {
-                                                databaseHandler.resetPalmTable()
-                                            }
-                                            if (jsonObjectRes.has("total_count")) {
-
-                                                sharedPref.setTotalPalm(jsonObjectRes.getString("total_count")
-                                                    .trim())
-                                            }
+                                    if (palmPageNo == "1") {
+                                        if (sharedPref.getPalmDBDownloadedTimeGMT()
+                                                .isNullOrEmpty()) {
+                                            databaseHandler.resetPalmTable()
                                         }
-
-                                        val jsonArray = jsonObjectRes.getJSONArray("palm_list")
-                                        if (jsonArray.length() > 0) {
-                                            val alPalmDetails = mutableListOf<Palm>()
-                                            for (i in 0 until jsonArray.length()) {
-
-                                                val obj = jsonArray.getJSONObject(i)
-
-                                                fun getSafe(key: String): String? {
-                                                    return if (obj.has(key) && !obj.isNull(key)) {
-                                                        val value = obj.getString(key).trim()
-                                                        if (value.equals("null",
-                                                                true) || value.isEmpty()) null else value
-                                                    } else null
-                                                }
-
-                                                fun getSafeBlob(key: String): ByteArray? {
-                                                    if (!obj.has(key) || obj.isNull(key)) return null
-                                                    val value = obj.getString(key).trim()
-                                                    if (value.equals("null",
-                                                            true) || value.isEmpty() || value == "[]") return null
-
-                                                    return try {
-                                                        val innerArray = JSONArray(value)
-                                                        val byteArray =
-                                                            ByteArray(innerArray.length())
-                                                        for (k in 0 until innerArray.length()) {
-                                                            byteArray[k] =
-                                                                innerArray.getInt(k).toByte()
-                                                        }
-                                                        byteArray
-                                                    } catch (e: Exception) {
-                                                        null
-                                                    }
-                                                }
-
-                                                val rgbLeft = getSafeBlob("palm_data_rgb_left")
-                                                val irLeft = getSafeBlob("palm_data_ir_left")
-                                                val rgbRight = getSafeBlob("palm_data_rgb_right")
-                                                val irRight = getSafeBlob("palm_data_ir_right")
-
-                                                val isDataAvailable =
-                                                    (rgbLeft?.isNotEmpty() == true) || (irLeft?.isNotEmpty() == true) || (rgbRight?.isNotEmpty() == true) || (irRight?.isNotEmpty() == true)
-
-                                                if (isDataAvailable) {
-                                                    val palmData = Palm(palmId = getSafe("palm_id"),
-                                                        palmDataOne = getSafe("palm_data_1"),
-                                                        childId = getSafe("palm_chilld_id"),
-                                                        childRegNo = getSafe("palm_reg_no"),
-
-                                                        palmDataRgbLeft = rgbLeft,
-                                                        palmDataIrLeft = irLeft,
-                                                        palmDataRgbRight = rgbRight,
-                                                        palmDataIrRight = irRight)
-                                                    alPalmDetails.add(palmData)
-                                                }
-                                            }
-
-                                            val data: Boolean =
-                                                databaseHandler.addBatchPalm(alPalmDetails)
-                                            if (data) {
-
-                                                homeView?.getPalmRes(data)
-                                            } else {
-
-                                                databaseHandler.resetPalmTable()
-                                                homeView?.getPalmRes(data)
-                                            }
-                                        } else {
-
-                                            homeView?.palmDownloaded()
+                                        if (jsonObjectRes.has("total_count")) {
+                                            sharedPref.setTotalPalm(jsonObjectRes.optString("total_count")
+                                                .trim())
                                         }
                                     }
+
+                                    val jsonArray = jsonObjectRes.optJSONArray("palm_list")
+                                    if (jsonArray != null && jsonArray.length() > 0) {
+                                        val alPalmDetails = mutableListOf<Palm>()
+                                        val childIdsToDelete = mutableListOf<String?>()
+                                        val isDbDownloaded =
+                                            !sharedPref.getPalmDBDownloadedTimeGMT().isNullOrEmpty()
+
+                                        val optStringOrNull = { obj: JSONObject, key: String ->
+                                            if (obj.isNull(key)) null
+                                            else {
+                                                val s = obj.optString(key)
+                                                if (s == "null" || s.isEmpty()) null else s
+                                            }
+                                        }
+
+                                        val jsonArrayToByteArray = { jsonStr: String? ->
+                                            if (jsonStr == null || jsonStr == "null" || jsonStr == "[]" || jsonStr.isEmpty()) {
+                                                null
+                                            } else {
+                                                try {
+                                                    val arr = JSONArray(jsonStr)
+                                                    ByteArray(arr.length()) { k ->
+                                                        arr.getInt(k).toByte()
+                                                    }
+                                                } catch (e: Exception) {
+                                                    null
+                                                }
+                                            }
+                                        }
+
+                                        for (i in 0 until jsonArray.length()) {
+                                            val obj = jsonArray.getJSONObject(i)
+                                            val palmChildId = optStringOrNull(obj, "palm_chilld_id")
+
+                                            val palmDataRgbLeft = jsonArrayToByteArray(obj.optString("palm_data_rgb_left"))
+                                            val palmDataIrLeft = jsonArrayToByteArray(obj.optString("palm_data_ir_left"))
+                                            val palmDataRgbRight = jsonArrayToByteArray(obj.optString("palm_data_rgb_right"))
+                                            val palmDataIrRight = jsonArrayToByteArray(obj.optString("palm_data_ir_right"))
+
+                                            if (palmDataRgbLeft != null || palmDataIrLeft != null || palmDataRgbRight != null || palmDataIrRight != null) {
+                                                if (isDbDownloaded && palmChildId != null) {
+                                                    childIdsToDelete.add(palmChildId)
+                                                }
+
+                                                alPalmDetails.add(
+                                                    Palm(
+                                                        palmId = optStringOrNull(obj, "palm_id"),
+                                                        palmDataOne = optStringOrNull(obj, "palm_data_1"),
+                                                        childId = palmChildId,
+                                                        childRegNo = optStringOrNull(obj, "palm_reg_no"),
+                                                        palmDataRgbLeft = palmDataRgbLeft,
+                                                        palmDataIrLeft = palmDataIrLeft,
+                                                        palmDataRgbRight = palmDataRgbRight,
+                                                        palmDataIrRight = palmDataIrRight
+                                                    )
+                                                )
+                                            }
+                                        }
+
+                                        if (childIdsToDelete.isNotEmpty()) {
+                                            databaseHandler.deletePalmsByChildIds(childIdsToDelete)
+                                        }
+
+                                        val data = databaseHandler.addBatchPalm(alPalmDetails)
+                                        if (data) {
+                                            homeView?.getPalmRes(data)
+                                        } else {
+                                            databaseHandler.resetPalmTable()
+                                            homeView?.getPalmRes(data)
+                                        }
+                                    } else {
+                                        homeView?.palmDownloaded()
+                                    }
+                                } else {
+                                    homeView?.palmDownloaded()
                                 }
                             } catch (e: Exception) {
                                 homeView?.palmDownloadFailed()
                             }
                         },
-                        Response.ErrorListener { error -> homeView?.palmDownloadFailed() }) {
+                        Response.ErrorListener { homeView?.palmDownloadFailed() }) {
                         @Throws(AuthFailureError::class)
                         override fun getParams(): Map<String, String> {
                             val map: MutableMap<String, String> = HashMap()
@@ -269,30 +269,14 @@ class HomePresenter(c: HomeActivity) {
                             return map
                         }
                     }
-
-//                            val headers: MutableMap<String?, String?>
-//                                get() = createBasicAuthHeader()
-//
-//                            fun createBasicAuthHeader(): HashMap<String?, String?> {
-//                                val headerMap = HashMap<String?, String?>()
-//                                val credentials = ""
-//                                val base64EncodedCredentials = Base64.encodeToString(credentials.toByteArray(), Base64.NO_WRAP)
-//                                headerMap.put("Authorization", "Basic " + base64EncodedCredentials)
-//                                return headerMap
-//                            }
-//                        }
-
-                    // RetryPolicy policy = new DefaultRetryPolicy(AppConfig.TIMEOUT, 4, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
                     val policy: RetryPolicy = DefaultRetryPolicy(8000,
                         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
-                    jsonObjReq.setRetryPolicy(policy)
+                    jsonObjReq.retryPolicy = policy
                     jsonObjReq.setShouldCache(false)
                     val requestQueue = Volley.newRequestQueue(c)
                     requestQueue.add(jsonObjReq)
-//                    AppController.getInstance().getRequestQueue().getCache().remove(url)
                 } catch (e: JSONException) {
-
                     homeView?.palmDownloadFailed()
                 }
             }

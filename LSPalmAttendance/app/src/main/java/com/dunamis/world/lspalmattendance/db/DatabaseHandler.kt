@@ -327,6 +327,26 @@ class DatabaseHandler(context: Context) :
         db.close()
     }
 
+    fun deletePalmsByChildIds(childIds: List<String?>) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            for (childId in childIds) {
+                if (childId != null) {
+                    db.delete(TABLE_PALM, "$KEY_CHILD_ID = ?", arrayOf(childId))
+                }
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            try {
+                db.endTransaction()
+            } catch (e: Throwable) {
+                // ignore
+            }
+            db.close()
+        }
+    }
+
     fun addBatchAttendance(attendanceList: List<Attendance>): Boolean {
 
         val db = this.writableDatabase
