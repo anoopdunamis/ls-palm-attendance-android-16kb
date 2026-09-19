@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Settings
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -113,6 +114,8 @@ class HomeActivity : AppCompatActivity(), HomeView {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        homeBinding.llStartMain.visibility = View.VISIBLE
 
         c = this;
         kotlinStatic = KotlinStatic(c)
@@ -428,9 +431,11 @@ class HomeActivity : AppCompatActivity(), HomeView {
             ConstraintLayout.LayoutParams.WRAP_CONTENT)
         entryTypeDialog.setCancelable(true)
 
+        var entryOrExitTap = false
         val intent = Intent(c, RecognitionActivity::class.java)
         entryTypeBinding.tvEntry.setOnClickListener {
 
+            entryOrExitTap = true
             entryTypeDialog.dismiss()
             if (kotlinStatic.isAutoTimeEnabled()) {
 
@@ -442,6 +447,7 @@ class HomeActivity : AppCompatActivity(), HomeView {
         }
         entryTypeBinding.tvExit.setOnClickListener {
 
+            entryOrExitTap = true
             entryTypeDialog.dismiss()
             if (kotlinStatic.isAutoTimeEnabled()) {
 
@@ -449,6 +455,14 @@ class HomeActivity : AppCompatActivity(), HomeView {
                 sharedPref.setRecognitionPageTime(kotlinStatic.fetchDate())
                 startActivity(intent)
                 finish()
+            }
+        }
+        homeBinding.llStartMain.visibility = View.INVISIBLE
+        entryTypeDialog.setOnDismissListener {
+
+            if (!entryOrExitTap) {
+
+                homeBinding.llStartMain.visibility = View.VISIBLE
             }
         }
         entryTypeDialog.show()
