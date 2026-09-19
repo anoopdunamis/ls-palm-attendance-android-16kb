@@ -424,7 +424,7 @@ class HomeActivity : AppCompatActivity(), HomeView {
         entryTypeDialog.setContentView(entryTypeBinding.root)
         val exitWindow = entryTypeDialog.window
         exitWindow?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        exitWindow?.setLayout(kotlinStatic.getWidth() / 100 * 90,
+        exitWindow?.setLayout(kotlinStatic.getWidth() / 100 * 97,
             ConstraintLayout.LayoutParams.WRAP_CONTENT)
         entryTypeDialog.setCancelable(true)
 

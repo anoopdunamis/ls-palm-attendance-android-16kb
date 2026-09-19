@@ -29,7 +29,6 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:fontFamily="@font/montserrat_regular"
             android:gravity="center"
             android:text="@string/select_mode_for_scanning_desc"
@@ -48,12 +47,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/ripple_effect_gray_20"
+                android:background="@drawable/ripple_effect_theme_orange_20"
                 android:fontFamily="@font/montserrat_semi_bold"
                 android:gravity="center"
                 android:padding="10dp"
                 android:text="@string/entry"
-                android:textColor="@color/black"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
                 android:textSize="18sp" />
 
             <TextView
@@ -71,12 +71,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/ripple_effect_gray_20"
+                android:background="@drawable/ripple_effect_theme_orange_20"
                 android:fontFamily="@font/montserrat_semi_bold"
                 android:gravity="center"
                 android:padding="10dp"
                 android:text="@string/exit"
-                android:textColor="@color/black"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
                 android:textSize="18sp" />
         </LinearLayout>
     </LinearLayout>

@@ -108,7 +108,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:background="@drawable/ripple_effect_black_20"
+                        android:background="@drawable/ripple_effect_theme_orange_20"
                         android:orientation="vertical">
 
                         <TextView
@@ -119,6 +119,7 @@
                             android:gravity="center"
                             android:padding="10dp"
                             android:text="@string/start_palm_recognition"
+                            android:textAllCaps="true"
                             android:textColor="@color/white"
                             android:textSize="18sp" />
                     </LinearLayout>
