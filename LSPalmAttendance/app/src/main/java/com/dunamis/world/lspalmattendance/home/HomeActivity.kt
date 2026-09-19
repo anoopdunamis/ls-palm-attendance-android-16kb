@@ -316,6 +316,7 @@ class HomeActivity : AppCompatActivity(), HomeView {
         homeBinding.tvDBDownload.text =
             "Downloading... DB: ${databaseHandler.getStudentCount()} / ${sharedPref.getTotalStudent()} | PALM: ${databaseHandler.getPalmCount()} / ${sharedPref.getTotalPalm()}"
 
+        sharedPref.setPalmDBDownloadedTimeGMT(kotlinStatic.gmtTimeRightNow())
 //        sharedPref.setStudentDBDownloadedTime(KotlinStatic().getDBDownloadedTime())
 //        homeBinding.tvDBUpdatedDate.text = sharedPref.getStudentDBDownloadedTime()
 
@@ -414,6 +415,7 @@ class HomeActivity : AppCompatActivity(), HomeView {
                 databaseHandler.resetPalmTable()
                 databaseHandler.resetStudentsTable()
                 databaseHandler.resetAttendanceTable()
+                sharedPref.setPalmDBDownloadedTimeGMT("")
                 gotoLogin()
             }
             logoutDialog.show()

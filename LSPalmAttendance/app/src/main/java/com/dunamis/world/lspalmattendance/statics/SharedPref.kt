@@ -162,6 +162,17 @@ class SharedPref(c: Context) {
         return sp.getString("DBDownloadedTime", "---")
     }
 
+    fun setPalmDBDownloadedTimeGMT(data: String?) {
+
+        spEditor.putString("PalmDBDownloadedTime", data)
+        spEditor.apply()
+    }
+
+    fun getPalmDBDownloadedTimeGMT(): String? {
+
+        return sp.getString("PalmDBDownloadedTime", "")
+    }
+
     fun setRecognitionPageTime(data: String?) {
 
         spEditor.putString("RecognitionPageTime", data)
