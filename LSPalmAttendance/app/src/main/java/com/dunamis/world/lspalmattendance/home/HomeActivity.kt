@@ -174,7 +174,7 @@ class HomeActivity : AppCompatActivity(), HomeView {
 
             if (homeBinding.tvDBDownload.isEnabled) {
 
-                homeBinding.tvStart.setTextColor(resources.getColor(R.color.gray))
+                homeBinding.tvStart.setTextColor(resources.getColor(R.color.theme_orange_disabled))
                 homeBinding.tvDBDownload.isEnabled = false
 
                 homeBinding.tvDBCount.text = "DB Total: 0 | Palm Total: 0"

@@ -3,6 +3,7 @@
     <color name="theme_yellow">#e0b737</color>
     <color name="theme_orange">#e25738</color>
     <color name="theme_saffron">#8b301b</color>
+    <color name="theme_orange_disabled">#F2B8AD</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
